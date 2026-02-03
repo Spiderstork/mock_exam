@@ -1,5 +1,6 @@
 <?php
 include 'connect_db.php';
+
 include 'setup/booking_bridge.php';
 include 'setup/booking.php';
 include 'setup/customer.php';
