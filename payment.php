@@ -6,6 +6,9 @@
     <title>booking</title>
   </head>
   <body>
+    <h2 id="timer">10:00</h2>
+
+
     <form action='backend/payment/confirm_payment.php' method='post'>
         <label for='card_number'>card number:</label><br>
         <input type='text' id='card_number' name='card_number' placeholder='Card Number' minlength="15" maxlength="16" required><br>
@@ -62,4 +65,27 @@
             document.getElementById("booking_name").focus(); 
         }
     });
+
+    
+</script>
+
+<script>
+  let timeLeft = 10 * 60; // 10 minutes in seconds
+  const timerElement = document.getElementById("timer");
+  const cancelForm = document.getElementById("cancelForm");
+
+  const countdown = setInterval(() => {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+
+    timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+    timeLeft--;
+
+    if (timeLeft < 0) {
+      clearInterval(countdown);
+      timerElement.textContent = "Time's up!";
+      window.location.href = "cancel.php";
+    }
+  }, 1000); // update every second
 </script>

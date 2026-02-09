@@ -1,67 +1,140 @@
+<?php
+include 'db/connect_db.php';
+
+$sql = "UPDATE booking b
+LEFT JOIN booking_bridge bb 
+  ON bb.booking_id = b.id
+SET b.canceled = TRUE
+WHERE b.booked_at <= NOW() - INTERVAL 10 MINUTE
+  AND b.canceled = FALSE
+  AND bb.booking_id IS NULL;
+";
+if ($conn->query($sql) === TRUE) {
+    echo "Old bookings cancelled successfully.";
+} else {
+    echo "Error cancelling old bookings: " . $conn->error;
+}
+?>
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>booking</title>
-  </head>
-  <body>
+    <style>
+        .container {  display: grid;
+        grid-template-columns: 1fr 1fr ;
+        grid-template-rows: 1fr 1fr;
+        gap: 0px 0px;
+        grid-auto-flow: row;
+        grid-template-areas:
+            "calander rs"
+            "calander  rs";
+        }
 
-    <form action='backend/payment/confirm_payment.php' method='post'>
-        <label for='card_number'>card number:</label><br>
-        <input type='text' id='card_number' name='card_number' placeholder='Card Number' minlength="15" maxlength="16" required><br>
+.calander { grid-area: calander; text-align: center; }
 
-        <label for='expiry_month'>expiry month:</label><br>
-        <input type='text' id='expiry_month' name='expiry_month' placeholder='MM' minlength="2" maxlength="2" required><br>
+.rs {  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 2.9fr 1fr;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "time_slot_container"
+    "save";
+  grid-area: rs;
+}
 
-        <label for='expiry_year'>expiry year:</label><br>
-        <input type='text' id='expiry_year' name='expiry_year' placeholder='YY' minlength="2" maxlength="2" required><br>
+.save { grid-area: save; 
+    display: flex;
+    flex-wrap: wrap;          /* allows breaking to next line */
+    justify-content: center;   }
 
-        <label for='cvv'>cvv:</label><br>
-        <input type='text' id='cvv' name='cvv' placeholder='CVV (3 digits)' minlength="3" maxlength="3" required><br>
+.time_slot_container { grid-area: time_slot_container; 
+    display: flex;
+    flex-direction: column;   /* stack title and slots */
+    justify-content: flex-start; /* push content to top */
+    align-items: center;
+}   
 
-        <label for='booking_name'>booking name:</label><br>
-        <input type='text' id='booking_name' name='booking_name' placeholder='Booking Name' required><br>
+    </style>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #8ab3ff;
+            color : white;
+            margin: 0;
+            padding: 20px;
+        }
+        .button {
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+            max-width: 200px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(2rem, 2.8vw, 1rem);       
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .button:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <div class="calander">
+            <h2>Calendar</h2>
+            <?php include "cal.php"; ?>
+            <h2>People Count</h2>
+            <?php include "people_count.php"; ?>
+    </div>
+    <div class="rs">
+        <div class="time_slot_container" >
+            <h2>Available Time Slots</h2>
+            <div class="time_slot_box" id="timeslots"></div>
+        </div>
+        <div class="save">
+            <div class="button" id="save_button">NEXT > </div>
+        </div>
+    </div>
+</div>
 
-        <label for='email'>email:</label><br>
-        <input type='email' name='email' placeholder='Email' required><br>
-
-        <input type='submit' value='Confirm Payment'>
-      </form>
-    </body>
+<form id="bookingForm" action="save_booking.php" method="POST">
+    <input type="hidden" name="date" id="date_input">
+    <input type="hidden" name="time_slot_id" id="time_slot_input">
+    <input type="hidden" name="people_count" id="people_count_input">
+</form>
+</body>
 </html>
-<script>
-    document.getElementById('card_number').addEventListener('input', function (event) {
-        var input = event.target;
-        var value = input.value;
-        if (value.length >= 16) {
-            input.value = value.slice(0, 16);
-            document.getElementById("expiry_month").focus(); 
-        }
-    });
-    document.getElementById('expiry_month').addEventListener('input', function (event) {
-        var input = event.target;
-        var value = input.value;
-        if (value.length >= 2) {
-            input.value = value.slice(0, 2);
-            document.getElementById("expiry_year").focus(); 
-        }
-    });
-    document.getElementById('expiry_year').addEventListener('input', function (event) {
-        var input = event.target;
-        var value = input.value;
-        if (value.length >= 2) {
-            input.value = value.slice(0, 2);
-            document.getElementById("cvv").focus(); 
-        }
-    });
-    document.getElementById('cvv').addEventListener('input', function (event) {
-        var input = event.target;
-        var value = input.value;
-        if (value.length >= 3) {
-            input.value = value.slice(0, 3);
-            document.getElementById("booking_name").focus(); 
-        }
-    });
+<script src="calendar.js"></script>
+<script src="get_time_slot.js"></script>
 </script>
+<script>
+    console.log(localStorage.getItem("selectedDate"));
+    console.log(localStorage.getItem("selectedDayOfWeek"));
+
+    save = document.getElementById("save_button");
+    save.addEventListener("click", function() {
+        const selectedDate = localStorage.getItem("selectedDate");
+        const selectedTimeSlot = localStorage.getItem("selectedTimeSlot");
+        const peopleCount = localStorage.getItem("peopleCount");
+
+        console.log("Saving booking with date:", selectedDate);
+        console.log("Selected time slot ID:", selectedTimeSlot);
+        console.log("People count:", peopleCount);
+
+        document.getElementById("date_input").value = selectedDate;
+        document.getElementById("time_slot_input").value = selectedTimeSlot;
+        document.getElementById("people_count_input").value = peopleCount;
+
+        document.getElementById("bookingForm").submit();
+});
+</script>
+
+
+
 

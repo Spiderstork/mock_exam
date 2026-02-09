@@ -1,7 +1,8 @@
 <?php
 $sql = "CREATE TABLE IF NOT EXISTS time_slot (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  date_ DATE NOT NULL,
+  day_id INT NOT NULL,
+  day_of_week INT NOT NULL,
   start_time TIME NOT NULL,
   end_time TIME NOT NULL
 )";

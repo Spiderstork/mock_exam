@@ -6,6 +6,7 @@ $sql = "CREATE TABLE IF NOT EXISTS booking(
   arived BOOLEAN DEFAULT FALSE,
   canceled BOOLEAN DEFAULT FALSE,
   seats INT NOT NULL,
+  arive_date DATE NULL DEFAULT NULL,
   table_id INT NOT NULL
 )";
 
