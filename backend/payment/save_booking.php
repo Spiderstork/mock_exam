@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db/connect_db.php';
+include '../../db/connect_db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $date = $_POST['date'];
@@ -23,11 +23,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         SELECT id
         FROM table_
         WHERE id NOT IN (
-        SELECT table_id
-        FROM booking
-        WHERE (arive_date =  ?
-            AND timeslot_id = ?) and canceled IS NOT TRUE
-        ) and max_seats >= ?;
+            SELECT table_id
+            FROM booking
+            WHERE (arive_date = ?
+            AND timeslot_id = ?)
+            AND canceled IS NOT TRUE
+        )
+        AND max_seats >= ?
+        ORDER BY max_seats ASC;
     ");
 
     $stmt->bind_param("sii", $date, $time_slot_id, $people_count);
@@ -50,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($conn->query($sql) === TRUE) {
         $_SESSION['booking_id'] = $conn->insert_id;
         $_SESSION['timer_end'] = time() + 10*60; 
-        header("Location: payment.php");
+        header("Location: ../../payment.php");
         exit();
     } else {
         echo "Error saving booking: " . $conn->error;

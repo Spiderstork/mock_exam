@@ -103,7 +103,7 @@ if ($conn->query($sql) === TRUE) {
     </div>
 </div>
 
-<form id="bookingForm" action="save_booking.php" method="POST">
+<form id="bookingForm" action="backend/payment/save_booking.php" method="POST">
     <input type="hidden" name="date" id="date_input">
     <input type="hidden" name="time_slot_id" id="time_slot_input">
     <input type="hidden" name="people_count" id="people_count_input">
