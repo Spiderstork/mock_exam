@@ -11,9 +11,15 @@ function show() {
             $table_id = $table['id'];
             $seats = $table['max_seats'];
 
-            echo "<div id=\"$table_id\">";
+            echo "<div>";
             echo "Table: $table_id | Seats: $seats";
-            echo "</div>";
+
+            echo "
+                <form method='POST' style='display:inline'>
+                    <input type='hidden' name='remove_id' value='$table_id'>
+                    <button type='submit'>Remove</button>
+                </form>
+            ";
         }
     }
 }
@@ -26,12 +32,24 @@ function add($amount) {
         echo "Error saving table: " . $conn->error;
     }
 }
+function remove($id) {
+    global $conn;
+    $sql = "UPDATE table_ SET removed = TRUE WHERE id = '$id'";
+    if ($conn->query($sql) !== TRUE) {
+        echo "Error removing table: " . $conn->error;
+    }
+}
 
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $amount = $_POST['amount'];
-    add($amount);
+    if (isset($_POST['amount'])) {
+        add((int)$_POST['amount']);
+    }
+
+    if (isset($_POST['remove_id'])) {
+        remove((int)$_POST['remove_id']);
+    }
 }
 show();
 ?>

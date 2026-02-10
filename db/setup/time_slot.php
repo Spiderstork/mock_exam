@@ -4,7 +4,8 @@ $sql = "CREATE TABLE IF NOT EXISTS time_slot (
   day_id INT NOT NULL,
   day_of_week INT NOT NULL,
   start_time TIME NOT NULL,
-  end_time TIME NOT NULL
+  end_time TIME NOT NULL,
+  removed BOOLEAN DEFAULT FALSE
 )";
 
 if ($conn->query($sql) === TRUE) {
