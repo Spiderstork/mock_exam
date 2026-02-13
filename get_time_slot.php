@@ -4,7 +4,7 @@ include "db/connect_db.php";
 $day = isset($_GET['day']) ? intval($_GET['day']) : -1;
 
 if ($day >= 0) {
-    $sql = "SELECT * FROM time_slot WHERE day_of_week = ? ORDER BY start_time ASC";
+    $sql = "SELECT * FROM time_slot WHERE day_of_week = ? AND removed = 0 ORDER BY start_time ASC";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $day);
     $stmt->execute();
