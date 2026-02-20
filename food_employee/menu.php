@@ -3,42 +3,76 @@ include "check_title.php";
 include '../db/connect_db.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
     if (isset($_POST['edit'])) {
         edit((int)$_POST['edit_id'], $_POST['name'], $_POST['email'], $_POST['table'] ?? 0, $_POST['food'] ?? 0, $_POST['admin'] ?? 0, $_POST['banned'] ?? 0);
     }
+
     if (isset($_POST['new_item'])) {
         $name = $_POST['name'];
-        $about= $_POST['about'];
-        $price= $_POST['price'];
+        $about = $_POST['about'];
+        $price = $_POST['price'];
         $special = isset($_POST['special']) ? 1 : 0;
-        $verticle_picture = $_POST['verticle_picture'];
-        $horozontial_picture= $_POST['horozontial_picture'];
-        $verticle = $_FILES['verticle_picture'];
-        move_uploaded_file($verticle['tmp_name'], 'uploads/' . $verticle['name']);
-        $horozontial_picture = $_FILES['verticle_picture'];
-        move_uploaded_file($horozontial_picture['tmp_name'], 'uploads/' . $horozontial_picture['name']);
+        $removed = 0;
 
-        $stmt = $conn->prepare("INSERT INTO menu (username, email, table_portal, pass, food_portal, admin_portal) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssisii", $name, $email, $table_portal, $password, $food_portal, $admin_portal);
+        $verticle = $_FILES['verticle_picture'];
+        $horozontial = $_FILES['horozontial_picture'];
+
+        // Prepare upload folder
+        $upload_dir = dirname(__DIR__) . '/uploads/'; // parent directory
+        if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
+
+        // Sanitize file names
+        $verticle_name = time() . '_' . preg_replace('/\s+/', '_', basename($verticle['name']));
+        $horozontial_name = time() . '_' . preg_replace('/\s+/', '_', basename($horozontial['name']));
+
+        // Validate upload
+        if ($verticle['error'] === 0 && $horozontial['error'] === 0) {
+            move_uploaded_file($verticle['tmp_name'], $upload_dir . $verticle_name);
+            move_uploaded_file($horozontial['tmp_name'], $upload_dir . $horozontial_name);
+        } else {
+            echo "File upload error!";
+            exit;
+        }
+
+        // Insert into database
+        $stmt = $conn->prepare("INSERT INTO menu (item_name, about, special, removed, horozontial_picture, verticle_picture, price) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssiisss", $name, $about, $special, $removed, $horozontial_name, $verticle_name, $price);
 
         if ($stmt->execute()) {
-            echo "<p style='color: green;'>New employee added successfully.</p><br>";
+            echo "<p style='color: green;'>New menu item added successfully.</p><br>";
         } else {
-            echo "Error adding employee: " . $stmt->error;
+            echo "Error adding menu item: " . $stmt->error;
         }
     }
 }
-$sql = "
-SELECT * FROM menu
-";
 
+// Display menu items
+$sql = "SELECT * FROM menu";
 $result = $conn->query($sql);
 
+
 if ($result->num_rows > 0) {
-while ($row = $result->fetch_assoc()) {
-    echo $row;
-}}else{
-    echo "no items yet";
+    while ($row = $result->fetch_assoc()) {
+        echo "<pre>";
+        print_r($row);
+        echo "</pre>";
+        echo "ID: " . $row['id'] . 
+        " | Name: " . $row['item_name'] . 
+        " | Price: " . $row['price'] . 
+
+        $vertical = $row['verticle_picture'] ?? '';
+        $horozontial = $row['horozontial_picture'] ?? '';
+
+        if ($vertical) {
+            echo "<img src='../uploads/$vertical' alt='Vertical Image'>";
+        }else{echo "fail to load verticle";}
+        if ($horozontial) {
+            echo "<img src='../uploads/$horozontial' alt='Vertical Image'>";
+        }else{echo "fail to load horizontal";}
+        }
+} else {
+    echo "No items yet";
 }
 ?>
 <br>
