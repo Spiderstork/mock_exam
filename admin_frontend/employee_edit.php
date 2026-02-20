@@ -1,10 +1,5 @@
 <?php
-session_start();
-
-if ($_SESSION['admin_portal'] != 1) {
-    header("Location: ../sign_in/sign_in.php");
-    exit();
-}else{
+include "check_title.php";
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)$_POST['edit_id'];
         $name = $_POST['name'];
@@ -27,4 +22,3 @@ if ($_SESSION['admin_portal'] != 1) {
         echo "<button type='submit' name='edit'>Submit</button>";
         echo "</form>";
     }
-}

@@ -1,10 +1,5 @@
 <?php
-session_start();
-
-if ($_SESSION['admin_portal'] != 1) {
-    header("Location: ../sign_in/sign_in.php");
-    exit();
-}else{
+include "check_title.php";
 include '../db/connect_db.php';
 
 function show(){
@@ -96,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 show();
-}
+
 ?>
 
 <form id="new_employee_form" method="POST" style="display:none;">
