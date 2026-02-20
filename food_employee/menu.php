@@ -1,3 +1,57 @@
+<style>
+.menu-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 20px 0;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    font-family: Arial, sans-serif;
+}
+
+.menu-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.menu-basic {
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.menu-row {
+    display: flex;
+    justify-content: space-between; /* pushes left & right apart */
+    align-items: center;
+}
+
+.menu-basic span {
+    margin-right: 15px;
+}
+
+details summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #007bff;
+    margin-top: 8px;
+}
+
+details summary:hover {
+    text-decoration: underline;
+}
+
+.menu-about {
+    margin-top: 10px;
+    color: #444;
+}
+
+.menu-images img {
+    margin: 12px 12px 0 0;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+</style>
 <?php
 include "check_title.php";
 include '../db/connect_db.php';
@@ -54,26 +108,64 @@ $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        echo "<pre>";
-        print_r($row);
-        echo "</pre>";
-        echo "ID: " . $row['id'] . 
-        " | Name: " . $row['item_name'] . 
-        " | Price: " . $row['price'] . 
 
         $vertical = $row['verticle_picture'] ?? '';
-        $horozontial = $row['horozontial_picture'] ?? '';
+        $horizontal = $row['horozontial_picture'] ?? '';
+        ?>
 
-        if ($vertical) {
-            echo "<img src='../uploads/$vertical' alt='Vertical Image'>";
-        }else{echo "fail to load verticle";}
-        if ($horozontial) {
-            echo "<img src='../uploads/$horozontial' alt='Vertical Image'>";
-        }else{echo "fail to load horizontal";}
-        }
+        <div class="menu-card">
+            <div class="menu-row">
+                <div>
+                    <div class="menu-title">
+                        <?php echo htmlspecialchars($row['item_name']); ?>
+                    </div>
+
+                    <div class="menu-basic">
+                        <span><strong>ID:</strong> <?php echo $row['id']; ?></span>
+                        <span><strong>Price:</strong> $<?php echo $row['price']; ?></span>
+                        <span><strong>Special:</strong> <?php echo $row['special'] ? 'Yes' : 'No'; ?></span>
+                    </div>
+                </div>
+
+            <form action="menu_edit.php" method="POST" style="display:inline">
+                <input type="hidden" name="edit_id" value="<?php echo htmlspecialchars($row['id']); ?>">
+                <input type="hidden" name="name" value="<?php echo htmlspecialchars($row['item_name']); ?>">
+                <input type="hidden" name="price" value="<?php echo htmlspecialchars($row['price']); ?>">
+                <input type="hidden" name="special" value="<?php echo htmlspecialchars($row['special']); ?>">
+                <button type="submit">Edit</button>
+            </form>
+            </div>
+
+            <details>
+                <summary>View Details</summary>
+
+                <div class="menu-about">
+                    <strong>About:</strong><br>
+                    <?php echo htmlspecialchars($row['about']); ?>
+                </div>
+
+                <div class="menu-images">
+                    <?php if ($vertical): ?>
+                        <img width="320" height="320"
+                             src="../uploads/<?php echo htmlspecialchars($vertical); ?>"
+                             alt="Vertical Image">
+                    <?php endif; ?>
+
+                    <?php if ($horizontal): ?>
+                        <img width="320" height="320"
+                             src="../uploads/<?php echo htmlspecialchars($horizontal); ?>"
+                             alt="Horizontal Image">
+                    <?php endif; ?>
+                </div>
+            </details>
+
+        </div>
+
+    <?php }
 } else {
     echo "No items yet";
 }
+
 ?>
 <br>
 <button id='add_item_button'>Add item</button>
