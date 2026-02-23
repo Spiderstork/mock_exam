@@ -22,7 +22,7 @@
 
 .menu-row {
     display: flex;
-    justify-content: space-between; /* pushes left & right apart */
+    justify-content: space-between; 
     align-items: center;
 }
 
@@ -132,6 +132,10 @@ if ($result->num_rows > 0) {
                 <input type="hidden" name="name" value="<?php echo htmlspecialchars($row['item_name']); ?>">
                 <input type="hidden" name="price" value="<?php echo htmlspecialchars($row['price']); ?>">
                 <input type="hidden" name="special" value="<?php echo htmlspecialchars($row['special']); ?>">
+                <input type="hidden" name="removed" value="<?php echo htmlspecialchars($row['removed']); ?>">
+                <input type="hidden" name="about" value="<?php echo htmlspecialchars($row['about']); ?>">
+                <input type="hidden" name="vertical" value="<?php echo htmlspecialchars($vertical); ?>">
+                <input type="hidden" name="horizontal" value="<?php echo htmlspecialchars($horizontal); ?>">
                 <button type="submit">Edit</button>
             </form>
             </div>

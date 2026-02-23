@@ -2,19 +2,22 @@ const monthYear = document.getElementById("monthYear");
 const daysContainer = document.getElementById("days");
 const prevBtn = document.getElementById("prev");
 const nextBtn = document.getElementById("next");
-let selectedDate = localStorage.getItem("selectedDate"); 
-
-
-
+let selectedDate = localStorage.getItem("selectedDate") || null;
 
 let currentDate = new Date();
+
+// Helper to format YYYY-MM-DD
+function formatDate(year, month, day) {
+    const m = String(month).padStart(2, "0"); // month 1-12
+    const d = String(day).padStart(2, "0");
+    return `${year}-${m}-${d}`;
+}
 
 function renderCalendar() {
     daysContainer.innerHTML = "";
 
     const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-
+    const month = currentDate.getMonth(); // 0-indexed
     const firstDay = new Date(year, month, 1).getDay();
     const lastDate = new Date(year, month + 1, 0).getDate();
 
@@ -22,7 +25,6 @@ function renderCalendar() {
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ];
-
     monthYear.textContent = `${months[month]} ${year}`;
 
     // Empty cells before first day
@@ -37,49 +39,37 @@ function renderCalendar() {
         const dayEl = document.createElement("div");
         dayEl.textContent = day;
 
+        const cellDateStr = formatDate(year, month + 1, day);
+
+        // Today
         const today = new Date();
-        if (
-          day === today.getDate() &&
-          month === today.getMonth() &&
-          year === today.getFullYear()
-        ) {
-          dayEl.classList.add("today");
+        const todayStr = formatDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
+        if (cellDateStr === todayStr) {
+            dayEl.classList.add("today");
         }
 
-        const cellDate = new Date(year, month, day);
-        // Remove time so comparison is date-only
-        today.setHours(0, 0, 0, 0);
-        if (cellDate < today) {
-            dayEl.classList.add("before");   
-            dayEl.style.pointerEvents = "none"; 
+        // Past dates
+        if (new Date(cellDateStr) < new Date(todayStr)) {
+            dayEl.classList.add("before");
+            dayEl.style.pointerEvents = "none";
         }
 
-        const thisDateKey = `${year}-${month}-${day}`;
-
-        if (thisDateKey === selectedDate) {
+        // Selected date
+        if (cellDateStr === selectedDate) {
             dayEl.classList.remove("today");
-            dayEl.classList.add("selected_day"); 
+            dayEl.classList.add("selected_day");
         }
-
 
         daysContainer.appendChild(dayEl);
     }
 }
 
+// Get day of the week 0-6
 function getDayOfWeek(dateString) {
-    const date = new Date(dateString);
-    return date.getDay();
+    return new Date(dateString).getDay();
 }
 
-prevBtn.addEventListener("click", () => {
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    renderCalendar();
-});
-
-nextBtn.addEventListener("click", () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    renderCalendar();
-});
+// Fetch time slots
 function getTimeSlots(dayOfWeek) {
     fetch(`get_time_slot.php?day=${dayOfWeek}`)
         .then(response => response.text())
@@ -89,41 +79,47 @@ function getTimeSlots(dayOfWeek) {
         .catch(err => console.error(err));
 }
 
+// Previous / Next month buttons
+prevBtn.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+});
+
+nextBtn.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+});
+
+// Day click
 daysContainer.addEventListener("click", (e) => {
     if (e.target.tagName === "DIV" && e.target.textContent) {
-        const day = e.target.textContent;
+        const day = parseInt(e.target.textContent);
         const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
+        const month = currentDate.getMonth() + 1; // 1-12
 
-        selectedDate = `${year}-${month}-${day}`;
-        const formattedMonth = String(month + 1).padStart(2, "0");
-        const formattedDay = String(day).padStart(2, "0");
-        selectedDay = `${year}-${formattedMonth}-${formattedDay}`;
-
-        
+        selectedDate = formatDate(year, month, day);
         localStorage.setItem("selectedDate", selectedDate);
-        localStorage.setItem("selectedDayOfWeek", getDayOfWeek(selectedDay));
-        getTimeSlots(getDayOfWeek(selectedDay));
+        localStorage.setItem("selectedDayOfWeek", getDayOfWeek(selectedDate));
 
+        getTimeSlots(getDayOfWeek(selectedDate));
         renderCalendar();
     }
 });
 
+// Initialize calendar
 function start() {
-    const day = new Date().getDate();
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
 
-    selectedDate = `${year}-${month}-${day}`;
-    const formattedMonth = String(month + 1).padStart(2, "0");
-    const formattedDay = String(day).padStart(2, "0");
-    selectedDay = `${year}-${formattedMonth}-${formattedDay}`;
+    if (!selectedDate) {
+        selectedDate = formatDate(year, month, day);
+        localStorage.setItem("selectedDate", selectedDate);
+        localStorage.setItem("selectedDayOfWeek", getDayOfWeek(selectedDate));
+    }
 
-        
-    localStorage.setItem("selectedDate", selectedDate);
-    localStorage.setItem("selectedDayOfWeek", getDayOfWeek(selectedDay));
-    getTimeSlots(getDayOfWeek(selectedDay));
-
+    getTimeSlots(getDayOfWeek(selectedDate));
     renderCalendar();
 }
 

@@ -10,9 +10,11 @@ if (!isset($_SESSION['employee_id'])) {
         echo "<button onclick=\"window.location.href='../admin_frontend/employe_portal.php'\">Employee Portal</button>";
         echo "<button onclick=\"window.location.href='../admin_frontend/open_hours.php'\">Opening Hours</button>";
         echo "<button onclick=\"window.location.href='../table_employee/booking.php'\">booking</button>";
+        echo "<button onclick=\"window.location.href='../food_employee/menu.php'\">menu</button>";
     } else if ($_SESSION['table_portal'] == 1) {
         echo "<button onclick=\"window.location.href='../table_employee/booking.php'\">booking</button>";
     } else if ($_SESSION['food_portal'] == 1) {
+        echo "<button onclick=\"window.location.href='../food_employee/menu.php'\">menu</button>";
     } else {
         echo "You do not have access to any portals.";
     }
