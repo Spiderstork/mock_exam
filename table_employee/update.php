@@ -74,7 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit'])) {
         echo "<p style='color:green;'>Booking and customer updated successfully!</p>";
 
         echo "<button  action='booking.php' >-></button>";
-        exit();
+        
+        header("Location: booking.php");
     } else {
         echo "<p style='color:red;'>No available table for this timeslot and seat amount.</p>";
     }

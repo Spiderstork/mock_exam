@@ -8,6 +8,15 @@
     box-shadow: 0 6px 18px rgba(0,0,0,0.06);
     font-family: Arial, sans-serif;
 }
+.removed-menu-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 20px 0;
+    background: #ff0000;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    font-family: Arial, sans-serif;
+}
 
 .menu-title {
     font-size: 20px;
@@ -102,7 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 
 // Display menu items
-$sql = "SELECT * FROM menu";
+$sql = "SELECT * FROM menu ORDER BY  removed ASC,special DESC";
 $result = $conn->query($sql);
 
 
@@ -111,9 +120,15 @@ if ($result->num_rows > 0) {
 
         $vertical = $row['verticle_picture'] ?? '';
         $horizontal = $row['horozontial_picture'] ?? '';
+        if ($row['removed']) {
+            echo "<div class='removed-menu-card'>This item has been removed.";
+            
+        }else {
+            echo "<div class='menu-card'>";
+        }
         ?>
 
-        <div class="menu-card">
+        
             <div class="menu-row">
                 <div>
                     <div class="menu-title">

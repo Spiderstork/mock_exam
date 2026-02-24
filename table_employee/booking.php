@@ -18,6 +18,10 @@ $result = $conn->query($sql);
 $date = null;
 
 while ($row = $result->fetch_assoc()) {
+    if (!$row["arived"] == 1){
+        echo '</div>';
+    }
+
     if ($date != $row["arive_date"]) {
         echo "<h3>" . htmlspecialchars($row["arive_date"]) . "</h3>";
         $date = $row["arive_date"];
@@ -25,7 +29,9 @@ while ($row = $result->fetch_assoc()) {
     if ($row["canceled"] == 1){
         echo '<div style="color: red;">';
     }
-
+    if ($row["arived"] == 1){
+        echo '<div style="color: green;">';
+    }
     echo "NAME: " . htmlspecialchars($row["booking_name"]) . 
          " | TIME: " . htmlspecialchars($row["start_time"]) . 
          " - " . htmlspecialchars($row["end_time"]). 
@@ -46,6 +52,13 @@ while ($row = $result->fetch_assoc()) {
             <input type="hidden" name="end_time" value="' . htmlspecialchars($row['end_time']) . '">
             <input type="hidden" name="canceled" value="' . htmlspecialchars($row['canceled']) . '">
             <button type="submit">Edit</button>
+        </form>
+    ';
+    echo '
+        <form action="arrived.php" method="POST" style="display:inline-block;margin:5px;">
+            <input type="hidden" name="edit_id" value="' . htmlspecialchars($row['edit_id']) . '">
+            <input type="hidden" name="arrived" value="1">
+            <button type="submit">arrived</button>
         </form>
     ';
     if ($row["canceled"] == 1){
